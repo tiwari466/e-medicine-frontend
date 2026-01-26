@@ -21,11 +21,12 @@ export const updateProfile = (user) => api.post("/Users/updateProfile", user);
 export const getUserList = () => api.get("/Admin/userList");
 export const addUpdateMedicine = (medicine) => api.post("/Admin/addUpdateMedicine", medicine);
 export const addToCart = (cart) => api.post("/Cart/addToCart", cart);
-export const getUserOrders = (userId) =>api.get(`/Order/userOrderList/${userId}`);
+export const getUserOrders = (userId) => api.get(`/Order/userOrderList/${userId}`);
 export const getMedicines = () => api.get("/Admin/getMedicines"); // Fetch all medicines
 export const getCartItems = (userId) => api.get(`/Cart/getCartItems/${userId}`);
 export const removeCartItem = (cartId) => api.delete(`/Cart/removeCartItem/${cartId}`);
 export const updateCartQty = (payload) => api.put(`/Cart/updateCartQty`, payload);
 export const uploadProfilePic = (formData) => api.post("/Users/uploadProfilePic", formData, { headers: { "Content-Type": "multipart/form-data", },});
 export const placeOrder = (payload) => api.post("/Order/placeOrder", payload);
+export const getOrderDetails = (userId, orderId) => api.get(`/Order/orderDetails/${userId}/${orderId}`);
 

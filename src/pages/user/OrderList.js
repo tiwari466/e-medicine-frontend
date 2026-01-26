@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { getUserOrders } from "../../api/api";
+import { useNavigate } from "react-router-dom";
 import "./OrderList.css";
 
 export default function OrderList() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [orders, setOrders] = useState([]);
-
+  const navigate = useNavigate();
   const fetchOrders = async () => {
     try {
       const response = await getUserOrders(user.user_id);
@@ -66,9 +67,12 @@ export default function OrderList() {
                     </p>
                   </div>
 
-                  <button className="trackBtn">
-                    Track Order
-                  </button>
+                 <button
+  className="trackBtn"
+  onClick={() => navigate(`/order-details/${order.id}`)}
+>
+  Track Order
+</button>
                 </div>
 
                 {/* ITEMS */}
@@ -105,9 +109,12 @@ export default function OrderList() {
                     Need help? Contact support
                   </span>
 
-                  <button className="detailsBtn">
-                    View Details
-                  </button>
+                  <button
+                  className="detailsBtn"
+                  onClick={() => navigate(`/order-details/${order.id}`)}
+                >
+                  View Details
+                </button>
                 </div>
               </div>
             ))}

@@ -15,6 +15,7 @@ import Profile from "./pages/user/Profile";
 import Cart from "./pages/user/Cart";
 import OrderList from "./pages/user/OrderList";
 import MedicineList from "./pages/user/MedicineList";
+import OrderDetails from "./pages/user/OrderDetails";
 
 // Admin Pages
 import AddUpdateMedicine from "./pages/admin/AddUpdateMedicine";
@@ -62,7 +63,14 @@ function Layout() {
             </PrivateRoute>
           }
         />
-
+        <Route
+          path="/order-details/:orderId"
+          element={
+            <PrivateRoute>
+              <OrderDetails />
+            </PrivateRoute>
+          }
+        />
         <Route path="/medicines" element={<MedicineList />} />
 
         {/* Admin Routes */}
