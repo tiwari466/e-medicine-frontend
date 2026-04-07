@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { loginUser } from "../../api/api";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
@@ -26,17 +28,26 @@ const handleLogin = async () => {
     console.log("LOGIN RESPONSE:", res.data);
 
     if (res.data?.statusCode === 200) {
-  localStorage.setItem("user", JSON.stringify(res.data.user)); // ✅ important
-  localStorage.setItem("token", res.data.token); // optional
+      const userData = res.data.data; // ✅ ONLY user object
+
+      // ✅ AuthContext handles localStorage + state
+      login(userData);
+
+      // optional: token
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+
       navigate("/medicines");
     } else {
-      alert("❌ " + (res.data?.statusMessage || "Invalid Email or Password"));
+      alert("❌ " + (res.data?.message || "Invalid Email or Password"));
     }
   } catch (err) {
-    console.log("LOGIN ERROR:", err);
+    console.error("LOGIN ERROR:", err);
     alert("❌ Backend not reachable / CORS issue");
   }
 };
+
 
   return (
     <div style={styles.page}>

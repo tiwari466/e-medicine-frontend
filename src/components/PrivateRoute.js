@@ -1,7 +1,8 @@
 import { Navigate } from "react-router-dom";
-
+import { useAuth } from "../context/AuthContext";
 export default function PrivateRoute({ children, adminOnly }) {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const storedUser = localStorage.getItem("user");
+const user = storedUser ? JSON.parse(storedUser) : null;
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -13,3 +14,5 @@ export default function PrivateRoute({ children, adminOnly }) {
 
   return children;
 }
+
+

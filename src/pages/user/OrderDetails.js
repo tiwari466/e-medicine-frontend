@@ -6,53 +6,59 @@ import "./OrderDetails.css";
 export default function OrderDetails() {
   const { orderId } = useParams();
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   const [order, setOrder] = useState(null);
 
   const fetchDetails = async () => {
-  try {
-    if (!user?.user_id) return;
+    try {
+      if (!user?.user_id || !orderId) return;
 
-    const res = await getOrderDetails(user.user_id, orderId);
-    const code = res.data.StatusCode || res.data.statusCode;
+      const res = await getOrderDetails(user.user_id, orderId);
 
-    if (code === 200) {
-      setOrder(res.data.order);
-    } else {
+      const code = res.data?.StatusCode || res.data?.statusCode;
+
+      if (code === 200) {
+        // ✅ support both shapes
+        const orderData = res.data.order || res.data.data || null;
+        setOrder(orderData);
+      } else {
+        setOrder(null);
+      }
+    } catch (err) {
+      console.error("ORDER DETAILS ERROR:", err);
       setOrder(null);
     }
-  } catch (err) {
-    console.error("ORDER DETAILS ERROR:", err);
-    setOrder(null);
-  }
-};
+  };
 
   useEffect(() => {
     fetchDetails();
   }, [orderId]);
 
-    const formatDate = (d) => {
+  const formatDate = (d) => {
     if (!d) return "Not updated";
     return new Date(d).toLocaleString();
-    };
+  };
 
-    const statusSteps = [
+  const statusSteps = [
     { key: "Pending", label: "Order Placed", time: order?.placed_time },
     { key: "Shipped", label: "Shipped", time: order?.shipped_time },
     { key: "OutForDelivery", label: "Out for Delivery", time: order?.out_for_delivery_time },
     { key: "Delivered", label: "Delivered", time: order?.delivered_time },
-    ];
+  ];
 
-    const getActiveIndex = () => {
+  const getActiveIndex = () => {
     const s = (order?.order_status || "").toLowerCase();
     if (s.includes("delivered")) return 4;
     if (s.includes("out")) return 3;
     if (s.includes("shipped")) return 2;
     return 1;
-    };
+  };
 
-const active = getActiveIndex();
+  const active = getActiveIndex();
+
   return (
     <div className="orderDetailsPage">
       <div className="orderDetailsContainer">
@@ -60,7 +66,6 @@ const active = getActiveIndex();
           <button className="backBtn" onClick={() => navigate("/orders")}>
             ← Back
           </button>
-
           <h2 className="detailsTitle">📦 Order Details</h2>
         </div>
 
@@ -71,77 +76,70 @@ const active = getActiveIndex();
           </div>
         ) : (
           <>
-            {/* Order Summary */}
+            {/* SUMMARY */}
             <div className="orderSummaryCard">
               <div>
-                <p className="orderNoText">
-                  <b>Order No:</b> {order.order_no}
-                </p>
-                <p className="orderStatusText">
-                  Status: <span className="statusBadge">{order.order_status}</span>
+                <p><b>Order No:</b> {order.order_no}</p>
+                <p>
+                  Status:{" "}
+                  <span className="statusBadge">{order.order_status}</span>
                 </p>
               </div>
 
               <div className="orderTotalBox">
-                <p className="totalLabel">Total Amount</p>
-                <p className="totalValue">₹ {order.order_total}</p>
+                <p>Total Amount</p>
+                <p>₹ {order.order_total}</p>
               </div>
             </div>
 
-            {/* Tracking Timeline */}
-                    <div className="trackCard">
-            <h3 className="trackTitle">🚚 Track Order</h3>
+            {/* TRACKING */}
+            <div className="trackCard">
+              <h3>🚚 Track Order</h3>
 
-            <p className="deliveryText">
+              <p>
                 Expected Delivery:{" "}
                 <b>
-                {order.expected_delivery_date
+                  {order.expected_delivery_date
                     ? new Date(order.expected_delivery_date).toDateString()
                     : "N/A"}
                 </b>
-            </p>
+              </p>
 
-            <div className="timeline">
+              <div className="timeline">
                 {statusSteps.map((s, index) => (
-                <div
+                  <div
                     key={s.key}
                     className={`step ${active >= index + 1 ? "active" : ""}`}
-                >
+                  >
                     <div className="dot"></div>
-
-                    <p className="stepLabel">{s.label}</p>
-                    <span className="stepTime">{formatDate(s.time)}</span>
-                </div>
-                ))}
-            </div>
-            </div>
-
-            {/* Items */}
-            <div className="itemsCard">
-              <h3 className="itemsTitle">🧾 Items in this Order</h3>
-
-              <div className="itemsList">
-                {order.items?.map((item) => (
-                  <div key={item.id} className="itemRow">
-                    <img
-                      src={item.image_url || "https://via.placeholder.com/80"}
-                      alt={item.medicine_name}
-                      className="itemImg"
-                      onError={(e) =>
-                        (e.target.src = "https://via.placeholder.com/80")
-                      }
-                    />
-
-                    <div className="itemInfo">
-                      <h4 className="itemName">{item.medicine_name}</h4>
-                      <p className="itemMeta">
-                        Qty: <b>{item.qty}</b> | Unit: ₹ {item.unit_price}
-                      </p>
-                      <p className="itemTotal">Total: ₹ {item.total_price}</p>
-                    </div>
+                    <p>{s.label}</p>
+                    <span>{formatDate(s.time)}</span>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* ITEMS */}
+            <div className="itemsCard">
+              <h3>🧾 Items</h3>
+
+              {(order.items || []).map((item) => (
+                <div key={item.id} className="itemRow">
+                  <img
+                    src={item.image_url || "https://via.placeholder.com/80"}
+                    alt={item.medicine_name}
+                    onError={(e) =>
+                      (e.target.src = "https://via.placeholder.com/80")
+                    }
+                  />
+
+                  <div>
+                    <h4>{item.medicine_name}</h4>
+                    <p>Qty: {item.qty} | ₹ {item.unit_price}</p>
+                    <p>Total: ₹ {item.total_price}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </>
         )}

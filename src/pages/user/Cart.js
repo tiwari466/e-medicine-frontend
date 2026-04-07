@@ -4,7 +4,8 @@ import { useCart } from "../../context/CartContext";
 import "./Cart.css";
 
 export default function Cart() {
-  const user = JSON.parse(localStorage.getItem("user"));
+   const storedUser = localStorage.getItem("user");
+const user = storedUser ? JSON.parse(storedUser) : null;
   const [cartItems, setCartItems] = useState([]);
   const { refreshCartCount } = useCart();
 
@@ -15,21 +16,23 @@ export default function Cart() {
 
     const res = await getCartItems(user.user_id);
 
-    // ✅ store list in variable
-    const list = res.data.listCarts || [];
+    if (res.data?.success) {
+      const list = res.data.data || [];
 
-    // ✅ set cart items
-    setCartItems(list);
+      setCartItems(list);
 
-    // ✅ update cart badge count (total qty)
-    const count = list.reduce((sum, x) => sum + Number(x.qty || 0), 0);
-    localStorage.setItem("cartCount", count);
+      const count = list.reduce(
+        (sum, x) => sum + Number(x.qty || 0),
+        0
+      );
 
+      localStorage.setItem("cartCount", count);
+      refreshCartCount();
+    }
   } catch (error) {
     console.error("FETCH CART ERROR:", error);
   }
 };
-
   useEffect(() => {
     fetchCart();
   }, []);

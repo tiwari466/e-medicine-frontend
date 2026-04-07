@@ -1,126 +1,189 @@
 import { useEffect, useState } from "react";
-import { getUserOrders } from "../../api/api";
+import { getUserOrders, cancelOrder, downloadInvoice } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import "./OrderList.css";
 
 export default function OrderList() {
-  const user = JSON.parse(localStorage.getItem("user"));
+
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
   const [orders, setOrders] = useState([]);
   const navigate = useNavigate();
+
+
+  // ================= FETCH ORDERS =================
   const fetchOrders = async () => {
     try {
-      const response = await getUserOrders(user.user_id);
 
-      const code = response.data.StatusCode || response.data.statusCode;
-      const list = response.data.listOrders || [];
+      if (!user?.user_id) {
+        console.log("❌ NO USER ID");
+        return;
+      }
 
-      if (code === 200) {
-        setOrders(list);
+      const res = await getUserOrders(user.user_id);
+
+      console.log("ORDER API RESPONSE:", res.data);
+
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        setOrders(res.data.data);
       } else {
+        console.warn("❌ No orders array found");
         setOrders([]);
       }
+
     } catch (error) {
       console.error("ORDER LIST ERROR:", error);
       setOrders([]);
     }
   };
 
+
+  // ================= LOAD =================
   useEffect(() => {
     fetchOrders();
   }, []);
 
+
+  // ================= STATUS CLASS =================
   const getStatusClass = (status) => {
+
     if (!status) return "statusPending";
+
     const s = status.toLowerCase();
+
     if (s.includes("delivered")) return "statusDelivered";
     if (s.includes("cancel")) return "statusCancelled";
+
     return "statusPending";
   };
 
+
+  // ================= CANCEL =================
+  const handleCancel = async (orderId) => {
+
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+
+    try {
+
+      const res = await cancelOrder({
+        user_id: user.user_id,
+        order_id: orderId,   // ✅ FIXED
+      });
+
+      alert(res.data?.message || "Order cancelled");
+
+      fetchOrders();
+
+    } catch (err) {
+
+      console.error(err);
+      alert("Cancel failed");
+    }
+  };
+
+
+  // ================= INVOICE =================
+  const handleInvoice = async (orderId) => {
+
+    try {
+
+      const res = await downloadInvoice(user.user_id, orderId);
+
+      const blob = new Blob([res.data], {
+        type: "application/pdf",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `Invoice_${orderId}.pdf`; // ✅ FIXED
+
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+
+    } catch (err) {
+
+      console.error(err);
+      alert("Invoice download failed");
+    }
+  };
+
+
+  // ================= UI =================
   return (
     <div className="ordersPage">
-      <div className="ordersContainer">
-        <h2 className="ordersTitle">📦 My Orders</h2>
 
-        {orders.length === 0 ? (
-          <div className="ordersEmpty">
-            <h3>No orders found</h3>
-            <p>Place an order from Cart 💊</p>
-          </div>
-        ) : (
-          <div className="ordersList">
-            {orders.map((order) => (
-              <div key={order.id} className="orderCard">
-                {/* TOP ROW */}
-                <div className="orderTopRow">
-                  <div>
-                    <p className="orderNo">
-                      <b>Order:</b> {order.order_no}
-                    </p>
-                    <p className="orderMeta">
-                      <span className="orderAmount">
-                        ₹ {order.order_total}
-                      </span>
-                      <span className={`orderStatus ${getStatusClass(order.order_status)}`}>
-                        {order.order_status}
-                      </span>
-                    </p>
-                  </div>
+      <h2>📦 My Orders</h2>
 
-                 <button
-  className="trackBtn"
-  onClick={() => navigate(`/order-details/${order.id}`)}
->
-  Track Order
-</button>
-                </div>
+      {orders.length === 0 ? (
 
-                {/* ITEMS */}
-                <div className="orderItems">
-                  {order.items?.map((item) => (
-                    <div key={item.id} className="orderItemRow">
-                      <img
-                        src={item.image_url || "https://via.placeholder.com/70"}
-                        alt={item.medicine_name}
-                        className="orderItemImg"
-                        onError={(e) =>
-                          (e.target.src = "https://via.placeholder.com/70")
-                        }
-                      />
+        <div className="ordersEmpty">
+          <h3>No orders found</h3>
+          <p>Place an order from Cart 💊</p>
+        </div>
 
-                      <div className="orderItemInfo">
-                        <h4 className="orderItemName">{item.medicine_name}</h4>
+      ) : (
 
-                        <p className="orderItemSmall">
-                          Qty: <b>{item.qty}</b> | Unit: ₹ {item.unit_price}
-                        </p>
+        orders.map((order) => (
 
-                        <p className="orderItemTotal">
-                          Total: ₹ {item.total_price}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          <div key={order.order_id} className="orderCard"> {/* ✅ FIXED */}
 
-                {/* FOOTER */}
-                <div className="orderFooter">
-                  <span className="helpText">
-                    Need help? Contact support
+            <div className="orderTopRow">
+
+              <div>
+
+                <p><b>Order:</b> {order.order_no}</p>
+
+                <p>
+                  ₹ {order.order_total}{" "}
+
+                  <span className={getStatusClass(order.order_status)}>
+                    {order.order_status}
                   </span>
 
-                  <button
-                  className="detailsBtn"
-                  onClick={() => navigate(`/order-details/${order.id}`)}
-                >
-                  View Details
-                </button>
-                </div>
+                </p>
+
               </div>
-            ))}
+
+
+              <button
+                onClick={() =>
+                  navigate(`/order-details/${order.order_id}`)
+                }
+              >
+                Track
+              </button>
+
+
+              <button
+                onClick={() => handleInvoice(order.order_id)}
+              >
+                Invoice
+              </button>
+
+
+              {order.order_status !== "Delivered" &&
+               order.order_status !== "Cancelled" && (
+
+                <button
+                  onClick={() => handleCancel(order.order_id)}
+                >
+                  Cancel
+                </button>
+
+              )}
+
+            </div>
+
           </div>
-        )}
-      </div>
+
+        ))
+      )}
+
     </div>
   );
 }

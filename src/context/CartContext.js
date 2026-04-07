@@ -1,34 +1,19 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getCartItems } from "../api/api";
 
 const CartContext = createContext();
 
-export const CartProvider = ({ children }) => {
-  const user = JSON.parse(localStorage.getItem("user"));
+export function CartProvider({ children }) {
+  const [cartCount, setCartCount] = useState(
+    Number(localStorage.getItem("cartCount") || 0)
+  );
 
-  const [cartCount, setCartCount] = useState(0);
-
-  const refreshCartCount = async () => {
-    try {
-      if (!user?.user_id) {
-        setCartCount(0);
-        return;
-      }
-
-      const res = await getCartItems(user.user_id);
-      const items = res.data.listCarts || [];
-
-      // 🔥 Total qty count (not only items length)
-      const totalQty = items.reduce((sum, x) => sum + Number(x.qty || 0), 0);
-
-      setCartCount(totalQty);
-    } catch (err) {
-      console.log("CART COUNT ERROR:", err);
-      setCartCount(0);
-    }
+  // ✅ Refresh count ONLY from localStorage (NO API)
+  const refreshCartCount = () => {
+    const count = Number(localStorage.getItem("cartCount") || 0);
+    setCartCount(count);
   };
 
-  // auto load on app start
+  // ✅ Sync when app loads / login / logout
   useEffect(() => {
     refreshCartCount();
   }, []);
@@ -38,6 +23,6 @@ export const CartProvider = ({ children }) => {
       {children}
     </CartContext.Provider>
   );
-};
+}
 
 export const useCart = () => useContext(CartContext);

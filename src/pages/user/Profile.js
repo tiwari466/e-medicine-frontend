@@ -1,110 +1,185 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateProfile, uploadProfilePic } from "../../api/api";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./Profile.css";
 
 export default function Profile() {
+
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, updateUser } = useAuth();
 
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  const [user, setUser] = useState({ ...storedUser });
 
-  // Profile picture upload
+  // ------------------------
+  // STATE
+  // ------------------------
+
+  const [form, setForm] = useState({
+    first_name: "",
+    last_name: "",
+    password: "",
+  });
+
+  const [preview, setPreview] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [preview, setPreview] = useState(storedUser?.picture || "");
+  const [uploading, setUploading] = useState(false);
+
+
+  // ------------------------
+  // LOAD USER INTO FORM
+  // ------------------------
+
+useEffect(() => {
+  if (user) {
+    setForm({
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+      email: user.email || "",     // ✅ ADD
+      password: "",
+    });
+
+    if (user.picture) {
+      const pic = user.picture.startsWith("http")
+        ? user.picture
+        : `http://localhost:5249/profilepics/${user.picture}`;
+
+      setPreview(pic);
+    } else {
+      setPreview("");
+    }
+  }
+}, [user]);
+
+
+
+  // ------------------------
+  // GUARD
+  // ------------------------
+
+  if (!user) {
+    return <div className="profilePage">❌ User not logged in</div>;
+  }
+
+
+  // ------------------------
+  // HANDLERS
+  // ------------------------
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setUser({ ...user, [name]: value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  // when user selects file
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+
+  // AUTO UPLOAD ON SELECT
+  const handleFileChange = async (e) => {
+
+    const file = e.target.files?.[0];
     if (!file) return;
 
+    // Preview instantly
     setSelectedFile(file);
     setPreview(URL.createObjectURL(file));
-  };
 
-  // Upload profile picture
-  const handleUploadPicture = async () => {
     try {
-      if (!selectedFile) {
-        alert("Please select image first");
-        return;
-      }
+
+      setUploading(true);
 
       const formData = new FormData();
-      formData.append("file", selectedFile);
+      formData.append("picture", file);
       formData.append("user_id", user.user_id);
 
       const res = await uploadProfilePic(formData);
 
-      alert(res.data.StatusMessage || res.data.statusMessage || "Uploaded");
+      if (res.data.success) {
 
-      if ((res.data.statusCode || res.data.StatusCode) === 200) {
-        const picUrl =
-          res.data.picture || res.data.fileUrl || res.data.url || "";
+  const imageUrl = `http://localhost:5249/profilepics/${res.data.data}`;
 
-        if (!picUrl) {
-          alert("Picture URL not returned from API");
-          return;
-        }
+  const updated = {
+    ...user,
+    picture: imageUrl,
+  };
 
-        const updatedUser = { ...user, picture: picUrl };
-        setUser(updatedUser);
-        setPreview(picUrl);
+  updateUser(updated);
+ setPreview(imageUrl + "?t=" + Date.now());
 
-        // save in localStorage so after logout/login it will show
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-      }
-    } catch (error) {
-      console.log("UPLOAD ERROR:", error.response?.data || error.message);
-      alert("❌ Profile picture upload failed");
+  alert("✅ Profile picture updated");
+
+} else {
+  alert(res.data.message || "❌ Upload failed");
+}
+
+
+    } catch (err) {
+
+      console.error(err);
+      alert("❌ Upload failed");
+
+    } finally {
+      setUploading(false);
     }
   };
 
-  // Update Profile details
+
   const handleUpdate = async () => {
     try {
+
       const payload = {
         user_id: user.user_id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        password: user.password,
-        picture: user.picture,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        email: form.email,
       };
 
-      const response = await updateProfile(payload);
-
-      alert(response.data.StatusMessage || response.data.statusMessage);
-
-      if (
-        response.data.StatusCode === 200 ||
-        response.data.statusCode === 200
-      ) {
-        localStorage.setItem("user", JSON.stringify({ ...user, ...payload }));
+      // Send password only if entered
+      if (form.password) {
+        payload.password = form.password;
       }
-    } catch (error) {
-      console.error(error);
-      alert("Profile update failed");
+
+      const res = await updateProfile(payload);
+
+      if (res.data.success) {
+
+        updateUser({ ...user, ...payload });
+
+        setForm({
+          ...form,
+          password: "",
+        });
+
+        alert("✅ Profile updated");
+
+      } else {
+        alert(res.data.message || "Update failed");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("❌ Profile update failed");
     }
   };
 
-  // Active sidebar icon
+
   const isActive = (path) => location.pathname === path;
+
+
+  // ------------------------
+  // JSX
+  // ------------------------
 
   return (
     <div className="profilePage">
-      {/* LEFT SIDEBAR */}
+
+
+      {/* SIDEBAR */}
       <div className="profileSidebar">
+
         <div
           className={isActive("/medicines") ? "profileSideIconActive" : "profileSideIcon"}
           onClick={() => navigate("/medicines")}
-          title="Home"
         >
           🏠
         </div>
@@ -112,7 +187,6 @@ export default function Profile() {
         <div
           className={isActive("/profile") ? "profileSideIconActive" : "profileSideIcon"}
           onClick={() => navigate("/profile")}
-          title="Profile"
         >
           👤
         </div>
@@ -120,7 +194,6 @@ export default function Profile() {
         <div
           className={isActive("/cart") ? "profileSideIconActive" : "profileSideIcon"}
           onClick={() => navigate("/cart")}
-          title="Cart"
         >
           🛒
         </div>
@@ -128,137 +201,152 @@ export default function Profile() {
         <div
           className={isActive("/orders") ? "profileSideIconActive" : "profileSideIcon"}
           onClick={() => navigate("/orders")}
-          title="Orders"
         >
           📦
         </div>
+
       </div>
+
+
 
       {/* MAIN CONTENT */}
-      <div className="profileContent">
-        {/* TOP HEADER */}
-        <div className="profileTopHeader">
-          <div>
-            <h2 className="profileWelcomeText">
-              Welcome, {user?.first_name || "User"} 👋
-            </h2>
-            <p className="profileSubText">Manage your profile details</p>
-          </div>
+      <div className="profileContent settingsLayout">
 
-          <div className="profileTopRight">
-            <div className="profileSearchBox">
-              🔍{" "}
-              <input
-                placeholder="Search"
-                className="profileSearchInput"
-              />
-            </div>
 
-            <img
-              src={preview || user.picture || "https://i.pravatar.cc/150?img=3"}
-              alt="profile"
-              className="profileTopProfileImg"
-            />
-          </div>
+        {/* LEFT MENU */}
+        <div className="settingsMenu">
+
+          <h3>Settings</h3>
+
+          <div className="settingsItem active">✏️ Edit Profile</div>
+          <div className="settingsItem">🔔 Notification</div>
+          <div className="settingsItem">🔐 Security</div>
+          <div className="settingsItem">🎨 Appearance</div>
+          <div className="settingsItem">❓ Help</div>
+
         </div>
 
-        {/* PROFILE CARD */}
-        <div className="profileCard">
-          {/* TOP BANNER */}
-          <div className="profileBanner"></div>
 
-          {/* PROFILE HEADER */}
-          <div className="profileHeader">
-            <div className="profileLeft">
+
+        {/* RIGHT CARD */}
+        <div className="settingsCard">
+
+
+          {/* HEADER */}
+          <div className="settingsHeader">
+
+            <h2>Edit Profile</h2>
+
+            <div className="settingsAvatar">
+
               <img
-                src={preview || user.picture || "https://i.pravatar.cc/150?img=3"}
+                src={preview || "https://i.pravatar.cc/150"}
                 alt="profile"
-                className="profileBigImg"
               />
 
-              <div>
-                <h3 className="profileNameText">
-                  {(user.first_name || "") + " " + (user.last_name || "")}
-                </h3>
-                <p className="profileEmailText">{user.email}</p>
+              <label>
+                {uploading ? "Uploading..." : "Change"}
 
-                {/* Upload section */}
-                <div className="profileUploadRow">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="profileFileInput"
-                  />
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={uploading}
+                />
+              </label>
 
-                  <button
-                    onClick={handleUploadPicture}
-                    className="profileUploadBtn"
-                  >
-                    Upload
-                  </button>
-                </div>
-              </div>
             </div>
 
-            <button onClick={handleUpdate} className="profileSaveBtn">
-              Save
-            </button>
           </div>
+
+
 
           {/* FORM */}
-          <div className="profileFormGrid">
-            <div className="profileField">
-              <label className="profileLabel">First Name</label>
-              <input
-                className="profileInput"
-                type="text"
-                name="first_name"
-                value={user.first_name || ""}
-                onChange={handleChange}
-                placeholder="First Name"
-              />
+          <div className="settingsForm">
+
+
+            <div className="row2">
+
+              <div className="field">
+                <label>First Name</label>
+
+                <input
+                  name="first_name"
+                  value={form.first_name}
+                  onChange={handleChange}
+                />
+              </div>
+
+
+              <div className="field">
+                <label>Last Name</label>
+
+                <input
+                  name="last_name"
+                  value={form.last_name}
+                  onChange={handleChange}
+                />
+              </div>
+
             </div>
 
-            <div className="profileField">
-              <label className="profileLabel">Last Name</label>
-              <input
-                className="profileInput"
-                type="text"
-                name="last_name"
-                value={user.last_name || ""}
-                onChange={handleChange}
-                placeholder="Last Name"
-              />
+
+
+            <div className="field">
+              <label>Email</label>
+
+              <div className="emailBox">
+                <input value={user.email} disabled />
+                <span>✔</span>
+              </div>
+
             </div>
 
-            <div className="profileField">
-              <label className="profileLabel">Email</label>
-              <input
-                className="profileInput"
-                type="email"
-                name="email"
-                value={user.email || ""}
-                onChange={handleChange}
-                placeholder="Email"
-                disabled
-              />
-            </div>
 
-            <div className="profileField">
-              <label className="profileLabel">Password</label>
+
+            <div className="field">
+              <label>New Password</label>
+
               <input
-                className="profileInput"
                 type="password"
                 name="password"
-                value={user.password || ""}
+                value={form.password}
                 onChange={handleChange}
-                placeholder="Password"
+                placeholder="Leave blank if not changing"
               />
             </div>
+
+
+
+            {/* ACTIONS */}
+            <div className="settingsActions">
+
+              <button
+                className="btnCancel"
+                onClick={() => window.location.reload()}
+                disabled={uploading}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="btnSave"
+                onClick={handleUpdate}
+                disabled={uploading}
+              >
+                Save
+              </button>
+
+            </div>
+
+
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 }
