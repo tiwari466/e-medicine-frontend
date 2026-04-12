@@ -5,45 +5,71 @@ import "./OrderList.css";
 
 export default function OrderList() {
 
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  // ================= USER =================
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem("user");
+
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        console.log("✅ USER:", parsed);
+      } else {
+        console.warn("❌ No user in localStorage");
+      }
+
+    } catch (err) {
+      console.error("❌ USER PARSE ERROR:", err);
+    }
+  }, []);
+
+  // ================= GET USER ID (FIX) =================
+  const getUserId = () => user?.user_id ?? user?.userId;
+
+  // ================= STATE =================
   const [orders, setOrders] = useState([]);
   const navigate = useNavigate();
-
 
   // ================= FETCH ORDERS =================
   const fetchOrders = async () => {
     try {
 
-      if (!user?.user_id) {
-        console.log("❌ NO USER ID");
+      const userId = getUserId();
+
+      console.log("👤 USER:", user);
+      console.log("🆔 USER ID USED:", userId);
+
+      if (!userId) {
+        console.warn("❌ INVALID USER ID");
+        setOrders([]);
         return;
       }
 
-      const res = await getUserOrders(user.user_id);
+      const res = await getUserOrders(userId);
 
-      console.log("ORDER API RESPONSE:", res.data);
+      console.log("📦 ORDER API RESPONSE:", res.data);
 
       if (res.data?.success && Array.isArray(res.data.data)) {
         setOrders(res.data.data);
       } else {
-        console.warn("❌ No orders array found");
+        console.warn("❌ No valid orders data");
         setOrders([]);
       }
 
     } catch (error) {
-      console.error("ORDER LIST ERROR:", error);
+      console.error("❌ ORDER LIST ERROR:", error);
       setOrders([]);
     }
   };
 
-
   // ================= LOAD =================
   useEffect(() => {
-    fetchOrders();
-  }, []);
-
+    if (getUserId()) {
+      fetchOrders();
+    }
+  }, [user]);
 
   // ================= STATUS CLASS =================
   const getStatusClass = (status) => {
@@ -58,7 +84,6 @@ export default function OrderList() {
     return "statusPending";
   };
 
-
   // ================= CANCEL =================
   const handleCancel = async (orderId) => {
 
@@ -66,9 +91,11 @@ export default function OrderList() {
 
     try {
 
+      const userId = getUserId();
+
       const res = await cancelOrder({
-        user_id: user.user_id,
-        order_id: orderId,   // ✅ FIXED
+        user_id: userId,
+        order_id: orderId,
       });
 
       alert(res.data?.message || "Order cancelled");
@@ -76,19 +103,19 @@ export default function OrderList() {
       fetchOrders();
 
     } catch (err) {
-
-      console.error(err);
+      console.error("❌ CANCEL ERROR:", err);
       alert("Cancel failed");
     }
   };
-
 
   // ================= INVOICE =================
   const handleInvoice = async (orderId) => {
 
     try {
 
-      const res = await downloadInvoice(user.user_id, orderId);
+      const userId = getUserId();
+
+      const res = await downloadInvoice(userId, orderId);
 
       const blob = new Blob([res.data], {
         type: "application/pdf",
@@ -99,19 +126,17 @@ export default function OrderList() {
       const link = document.createElement("a");
 
       link.href = url;
-      link.download = `Invoice_${orderId}.pdf`; // ✅ FIXED
+      link.download = `Invoice_${orderId}.pdf`;
 
       link.click();
 
       window.URL.revokeObjectURL(url);
 
     } catch (err) {
-
-      console.error(err);
+      console.error("❌ INVOICE ERROR:", err);
       alert("Invoice download failed");
     }
   };
-
 
   // ================= UI =================
   return (
@@ -119,7 +144,11 @@ export default function OrderList() {
 
       <h2>📦 My Orders</h2>
 
-      {orders.length === 0 ? (
+      {!getUserId() ? (
+        <div className="ordersEmpty">
+          <h3>Please login first</h3>
+        </div>
+      ) : orders.length === 0 ? (
 
         <div className="ordersEmpty">
           <h3>No orders found</h3>
@@ -130,25 +159,20 @@ export default function OrderList() {
 
         orders.map((order) => (
 
-          <div key={order.order_id} className="orderCard"> {/* ✅ FIXED */}
+          <div key={order.order_id} className="orderCard">
 
             <div className="orderTopRow">
 
               <div>
-
                 <p><b>Order:</b> {order.order_no}</p>
 
                 <p>
                   ₹ {order.order_total}{" "}
-
                   <span className={getStatusClass(order.order_status)}>
                     {order.order_status}
                   </span>
-
                 </p>
-
               </div>
-
 
               <button
                 onClick={() =>
@@ -158,13 +182,11 @@ export default function OrderList() {
                 Track
               </button>
 
-
               <button
                 onClick={() => handleInvoice(order.order_id)}
               >
                 Invoice
               </button>
-
 
               {order.order_status !== "Delivered" &&
                order.order_status !== "Cancelled" && (
