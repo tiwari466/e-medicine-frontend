@@ -11,7 +11,6 @@ import PrivateRoute from "./components/PrivateRoute";
 // User Pages
 import Login from "./pages/user/Login";
 import Register from "./pages/user/Register";
-import Profile from "./pages/user/Profile";
 import Cart from "./pages/user/Cart";
 import OrderList from "./pages/user/OrderList";
 import MedicineList from "./pages/user/MedicineList";
@@ -21,11 +20,14 @@ import OrderDetails from "./pages/user/OrderDetails";
 import AddUpdateMedicine from "./pages/admin/AddUpdateMedicine";
 import UserList from "./pages/admin/UserList";
 
+// ✅ FIXED IMPORT (TOP)
+import SettingsPage from "./settings/SettingsPage";
+
 function Layout() {
   const location = useLocation();
 
-  // ✅ Hide navbar only on these pages
-  const hideNavbarRoutes = ["/", "/login", "/register","/profile"];
+  // ✅ FIXED (removed /profile)
+  const hideNavbarRoutes = ["/", "/login", "/register"];
 
   return (
     <>
@@ -36,12 +38,12 @@ function Layout() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* User Routes */}
+        {/* ✅ FIXED PROFILE ROUTE */}
         <Route
           path="/profile"
           element={
             <PrivateRoute>
-              <Profile />
+              <SettingsPage />
             </PrivateRoute>
           }
         />
@@ -63,6 +65,7 @@ function Layout() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/order-details/:orderId"
           element={
@@ -71,9 +74,10 @@ function Layout() {
             </PrivateRoute>
           }
         />
+
         <Route path="/medicines" element={<MedicineList />} />
 
-        {/* Admin Routes */}
+        {/* Admin */}
         <Route
           path="/admin/add-medicine"
           element={

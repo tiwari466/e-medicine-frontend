@@ -1,129 +1,14 @@
-/* ================================
-   ROOT PAGE
-================================ */
-
-.profilePage {
-  display: flex;
-  min-height: 100vh;
-  background: #020617;
-  padding: 20px;
-  gap: 20px;
-  color: white;
-  font-family: "Segoe UI", sans-serif;
-}
-
-
-/* ================================
-   SIDEBAR
-================================ */
-
-.profileSidebar {
-  width: 70px;
-  background: #020617;
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 18px 0;
-  gap: 18px;
-  border: 1px solid #1e293b;
-}
-
-.profileSideIcon,
-.profileSideIconActive {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.profileSideIcon {
-  background: #0f172a;
-  border: 1px solid #1e293b;
-}
-
-.profileSideIcon:hover {
-  background: #1e293b;
-}
-
-.profileSideIconActive {
-  background: #2563eb;
-}
-
-
-/* ================================
-   MAIN CONTENT
-================================ */
-
-.profileContent {
-  flex: 1;
-}
-
-
-/* ================================
-   SETTINGS LAYOUT
-================================ */
-
-.settingsLayout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 25px;
-}
-
-
-/* ================================
-   SETTINGS MENU
-================================ */
-
-.settingsMenu {
-  background: #020617;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid #1e293b;
-}
-
-.settingsMenu h3 {
-  margin-bottom: 20px;
-  font-size: 18px;
-}
-
-.settingsItem {
-  padding: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #cbd5f5;
-  margin-bottom: 5px;
-}
-
-.settingsItem:hover {
-  background: #1e293b;
-}
-
-.settingsItem.active {
-  background: #2563eb;
-}
-
-
-/* ================================
-   SETTINGS CARD
-================================ */
-
+/* CARD */
 .settingsCard {
-  background: #020617;
-  border-radius: 14px;
-  padding: 25px;
+  width: 100%;
   border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 28px;
+  background: #020617;
   box-shadow: 0 0 25px rgba(0,0,0,0.6);
 }
 
-
-/* ================================
-   HEADER
-================================ */
-
+/* HEADER */
 .settingsHeader {
   display: flex;
   justify-content: space-between;
@@ -133,54 +18,47 @@
 
 .settingsHeader h2 {
   font-size: 22px;
-}
-
-
-/* ================================
-   AVATAR
-================================ */
-
-.settingsAvatar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.settingsAvatar img {
-  width: 55px;
-  height: 55px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #2563eb;
-}
-
-.settingsAvatar label {
-  font-size: 13px;
+  font-weight: 600;
   color: #3b82f6;
+}
+
+/* AVATAR */
+.profileImageWrapper {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #2563eb;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-.settingsAvatar label:hover {
-  text-decoration: underline;
+.profileImageWrapper:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(37,99,235,0.6);
 }
 
+.profileImageWrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-/* ================================
-   FORM
-================================ */
-
+/* FORM */
 .settingsForm {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
+/* TWO COLUMN */
 .row2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px;
+  gap: 18px;
 }
 
+/* FIELD */
 .field {
   display: flex;
   flex-direction: column;
@@ -192,61 +70,57 @@
   color: #94a3b8;
 }
 
-.field input {
-  background: #0f172a;
+/* INPUTS */
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 12px 14px;
+  background: #0f172a;         /* 🔥 DARK INPUT */
   border: 1px solid #1e293b;
-  padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   color: white;
-  outline: none;
   font-size: 14px;
+  outline: none;
+  transition: all 0.25s ease;
 }
 
-.field input:focus {
+/* FOCUS EFFECT */
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
   border-color: #2563eb;
+  box-shadow: 0 0 6px rgba(37,99,235,0.5);
 }
 
+/* DISABLED INPUT */
 .field input:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
 }
 
-
-/* ================================
-   EMAIL STATUS
-================================ */
-
-.emailBox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* TEXTAREA */
+.field textarea {
+  min-height: 90px;
+  resize: none;
 }
 
-.emailBox span {
-  background: #22c55e;
-  padding: 3px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-
-/* ================================
-   ACTION BUTTONS
-================================ */
-
+/* BUTTONS */
 .settingsActions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .btnCancel {
-  background: transparent;
   border: 1px solid #f97316;
   color: #f97316;
-  padding: 8px 18px;
-  border-radius: 6px;
+  background: transparent;
+  padding: 10px 18px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .btnCancel:hover {
@@ -256,41 +130,22 @@
 
 .btnSave {
   background: #2563eb;
-  border: none;
   color: white;
-  padding: 9px 22px;
-  border-radius: 6px;
-  cursor: pointer;
+  padding: 10px 22px;
+  border-radius: 8px;
   font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
 .btnSave:hover {
   background: #1d4ed8;
+  box-shadow: 0 0 10px rgba(37,99,235,0.6);
 }
-
-
-/* ================================
-   RESPONSIVE
-================================ */
-
-@media (max-width: 900px) {
-
-  .settingsLayout {
-    grid-template-columns: 1fr;
-  }
-
-  .settingsMenu {
-    display: none;
-  }
-
-  .profilePage {
-    flex-direction: column;
-  }
-
-  .profileSidebar {
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-  }
-
+.customInput {
+  appearance: none;
+}
+.customInput {
+  appearance: none;
+  background: #0f172a;
 }

@@ -7,24 +7,44 @@ import "./Navbar.css";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();      // ✅ AUTH SOURCE
-  const { cartCount } = useCart();         // ✅ CART SOURCE
+  const { user, logout } = useAuth();
+  const { cartCount } = useCart();
   const { isDark, setIsDark } = useTheme();
 
-
+  const BASE_URL = "https://localhost:44302";
 
   const [openProfile, setOpenProfile] = useState(false);
+
+  // ✅ SAFE IMAGE HANDLER (handles all cases)
+  const getProfileImage = () => {
+    if (!user?.picture) return "https://i.pravatar.cc/40";
+
+    // Already full URL
+    if (user.picture.startsWith("http")) {
+      return user.picture;
+    }
+
+    // Relative path from backend (/profilepics/...)
+    return `${BASE_URL}${user.picture}`;
+  };
 
   return (
     <div className="navbar">
       {/* LEFT */}
       <div className="nav-left">
         <span className="logo">💊</span>
-        <span className="title">E-Medicine</span>
+        <span
+  className="title"
+  style={{ cursor: "pointer" }}
+  onClick={() => navigate("/medicines")}
+>
+  E-Medicine
+</span>
       </div>
 
       {/* RIGHT */}
       <div className="nav-right">
+
         {/* Theme toggle */}
         <label className="theme-switch">
           <input
@@ -47,18 +67,15 @@ export default function Navbar() {
             className="icon-btn"
             onClick={() => setOpenProfile(!openProfile)}
           >
-           <img
-            src={
-              user?.picture
-                ? user.picture.startsWith("http")
-                  ? user.picture
-                  : `http://localhost:5249/uploads/${user.picture}`
-                : "https://i.pravatar.cc/40"
-            }
-            alt="profile"
-            className="profile-img"
-          />
-
+            <img
+              key={user?.picture} // ✅ force re-render when picture changes
+              src={getProfileImage()}
+              alt="profile"
+              className="profile-img"
+              onError={(e) => {
+                e.target.src = "https://i.pravatar.cc/40"; // fallback
+              }}
+            />
           </div>
 
           {openProfile && (
@@ -84,7 +101,8 @@ export default function Navbar() {
               </div>
 
               <div className="divider"></div>
-               <div
+
+              <div
                 className="dropdown-item"
                 style={{ color: "red" }}
                 onClick={() => {
@@ -95,7 +113,6 @@ export default function Navbar() {
               >
                 Logout
               </div>
-          
             </div>
           )}
         </div>
