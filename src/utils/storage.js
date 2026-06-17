@@ -1,19 +1,29 @@
-export const getStoredUser = () => {
-  try {
-    const raw = localStorage.getItem("user");
-    if (!raw || raw === "undefined") return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-};
+export const storage = {
+  getUser() {
+    const user = localStorage.getItem("user");
+    return user ? JSON.parse(user) : null;
+  },
 
-export const setStoredUser = (user) => {
-  if (!user) return;
-  localStorage.setItem("user", JSON.stringify(user));
-};
+  setUser(user) {
+    localStorage.setItem(
+      "user",
+      JSON.stringify(user)
+    );
+  },
 
-export const clearStoredUser = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
+  removeUser() {
+    localStorage.removeItem("user");
+  },
+
+  getToken() {
+    return localStorage.getItem("token");
+  },
+
+  setToken(token) {
+    localStorage.setItem("token", token);
+  },
+
+  removeToken() {
+    localStorage.removeItem("token");
+  },
 };

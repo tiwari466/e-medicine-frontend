@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getOrderDetails } from "../../api/api";
+import { getOrderDetails } from "../../api/orderApi";
+import { useAuth } from "../../context/AuthContext";
 import "./OrderDetails.css";
+
 
 export default function OrderDetails() {
   const { orderId } = useParams();
   const navigate = useNavigate();
 
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+ const { user } = useAuth();
 
   const [order, setOrder] = useState(null);
 

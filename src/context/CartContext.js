@@ -1,28 +1,39 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+} from "react";
 
 const CartContext = createContext();
 
-export function CartProvider({ children }) {
-  const [cartCount, setCartCount] = useState(
-    Number(localStorage.getItem("cartCount") || 0)
-  );
+export function CartProvider({
+  children,
+}) {
+  const [cartCount, setCartCount] =
+    useState(0);
 
-  // ✅ Refresh count ONLY from localStorage (NO API)
-  const refreshCartCount = () => {
-    const count = Number(localStorage.getItem("cartCount") || 0);
+  const updateCartCount = (
+    count
+  ) => {
     setCartCount(count);
   };
 
-  // ✅ Sync when app loads / login / logout
-  useEffect(() => {
-    refreshCartCount();
-  }, []);
+  const resetCart = () => {
+    setCartCount(0);
+  };
 
   return (
-    <CartContext.Provider value={{ cartCount, refreshCartCount }}>
+    <CartContext.Provider
+      value={{
+        cartCount,
+        updateCartCount,
+        resetCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
 }
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () =>
+  useContext(CartContext);

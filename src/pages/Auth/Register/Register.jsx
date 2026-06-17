@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { registerUser } from "../../api/api";
+import { registerUser } from "../../../api/authApi";
 import { Link, useNavigate } from "react-router-dom";
-
+import {
+  showSuccess,
+  showError,
+} from "../../../utils/toast";
 export default function Register() {
   const navigate = useNavigate();
 
@@ -42,14 +45,14 @@ export default function Register() {
 
       // backend returns: statusCode/statusMessage
       if (res.data?.statusCode === 200) {
-        alert("✅ Registered Successfully");
+        showSuccess("✅ Registered Successfully");
         navigate("/login");
       } else {
-        alert("❌ " + (res.data?.statusMessage || "Registration Failed"));
+        showSuccess("❌ " + (res.data?.statusMessage || "Registration Failed"));
       }
     } catch (err) {
       console.log("REGISTER ERROR:", err);
-      alert("❌ Backend not reachable / CORS issue");
+      showSuccess("❌ Backend not reachable / CORS issue");
     }
   };
 

@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
-import { getCartItems, removeCartItem, updateCartQty, placeOrder} from "../../api/api";
+import {
+ getCartItems,
+ removeCartItem,
+ updateCartQty
+} from "../../api/cartApi";
+
+import { placeOrder } from "../../api/orderApi";
+
+import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import "./Cart.css";
 
 export default function Cart() {
-   const storedUser = localStorage.getItem("user");
-const user = storedUser ? JSON.parse(storedUser) : null;
+   const { user } = useAuth();
   const [cartItems, setCartItems] = useState([]);
   const { refreshCartCount } = useCart();
 
@@ -34,8 +41,10 @@ const user = storedUser ? JSON.parse(storedUser) : null;
   }
 };
   useEffect(() => {
+  if (user?.user_id) {
     fetchCart();
-  }, []);
+  }
+}, [user]);
 
   // ✅ Remove item
   const handleRemove = async (cartId) => {
@@ -124,12 +133,17 @@ const handlePlaceOrder = async () => {
               <div key={item.id} className="cartItemCard">
                 <div className="cartItemImgBox">
                   <img
-                    src={item.image_url || "https://via.placeholder.com/120"}
+                    src={
+  item.image_url
+    ? item.image_url
+    : "https://dummyimage.com/200x200/e5e7eb/6b7280&text=Medicine"
+}
                     alt={item.medicine_name}
                     className="cartItemImg"
-                    onError={(e) =>
-                      (e.target.src = "https://via.placeholder.com/120")
-                    }
+                    onError={(e) => {
+ e.target.src =
+   "https://dummyimage.com/200x200/e5e7eb/6b7280&text=Medicine";
+}}
                   />
                 </div>
 

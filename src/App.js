@@ -1,14 +1,7 @@
-import AppRoutes from "./routes";
-import { CartProvider } from "./context/CartContext";
-import { ThemeProvider } from "./context/ThemeContext";
+import AppRoutes from "./routes/AppRoutes";
+
 function App() {
-  return (
-    <CartProvider>
-      <ThemeProvider>
-      <AppRoutes />
-      </ThemeProvider>
-    </CartProvider>
-  );
+  return <AppRoutes />;
 }
 
 export default App;

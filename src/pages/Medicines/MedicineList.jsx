@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { api, addToCart } from "../../api/api";
+import { getMedicines } from "../../api/medicineApi";
+import { addToCart } from "../../api/cartApi";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
@@ -19,7 +20,7 @@ export default function MedicineList() {
   // ===============================
   const fetchMedicines = async () => {
     try {
-      const res = await api.get("/Admin/getMedicines");
+     const res = await getMedicines();
 
       const { success, statusCode, data } = res.data;
 
@@ -131,11 +132,16 @@ export default function MedicineList() {
               <div key={med.id} className="med-card">
                 <img
                   className="med-img"
-                  src={med.image_url || "https://via.placeholder.com/400x250"}
+                  src={
+  med.image_url
+    ? med.image_url
+    : "https://dummyimage.com/400x250/e5e7eb/6b7280&text=Medicine"
+}
                   alt={med.medicine_name}
-                  onError={(e) =>
-                    (e.target.src = "https://via.placeholder.com/400x250")
-                  }
+                 onError={(e) => {
+ e.target.src =
+   "https://dummyimage.com/400x250/e5e7eb/6b7280&text=Medicine";
+}}
                 />
 
                 <div className="med-body">

@@ -1,36 +1,26 @@
 import { useEffect, useState } from "react";
-import { getUserOrders, cancelOrder, downloadInvoice } from "../../api/api";
+import {
+ getUserOrders,
+ cancelOrder,
+ downloadInvoice
+} from "../../api/orderApi";
+
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "./OrderList.css";
 
+
+
 export default function OrderList() {
 
-  // ================= USER =================
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
 
-  useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
-
-      if (storedUser) {
-        const parsed = JSON.parse(storedUser);
-        setUser(parsed);
-        console.log("✅ USER:", parsed);
-      } else {
-        console.warn("❌ No user in localStorage");
-      }
-
-    } catch (err) {
-      console.error("❌ USER PARSE ERROR:", err);
-    }
-  }, []);
-
-  // ================= GET USER ID (FIX) =================
-  const getUserId = () => user?.user_id ?? user?.userId;
-
-  // ================= STATE =================
   const [orders, setOrders] = useState([]);
+
   const navigate = useNavigate();
+
+  const getUserId = () =>
+    user?.user_id ?? user?.userId;
 
   // ================= FETCH ORDERS =================
   const fetchOrders = async () => {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { addUpdateMedicine } from "../../api/api";
+import { addUpdateMedicine } from "../../api/medicineApi";
 
 export default function AddUpdateMedicine() {
   const [medicine, setMedicine] = useState({

@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { loginUser } from "../../api/api";
+import { loginUser } from "../../../api/authApi";
+import { useAuth } from "../../../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-
+import {
+  showSuccess,
+  showError,
+} from "../../../utils/toast";
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -40,11 +43,11 @@ const handleLogin = async () => {
 
       navigate("/medicines");
     } else {
-      alert("❌ " + (res.data?.message || "Invalid Email or Password"));
+      showSuccess("❌ " + (res.data?.message || "Invalid Email or Password"));
     }
   } catch (err) {
     console.error("LOGIN ERROR:", err);
-    alert("❌ Backend not reachable / CORS issue");
+    showSuccess("❌ Backend not reachable / CORS issue");
   }
 };
 
