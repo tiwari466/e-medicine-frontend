@@ -7,9 +7,9 @@ export const ENV = {
 };
 */
 export const API_BASE_URL =
-  "http://emedicine-api.runasp.net/api";
+  "https://emedicine-api.runasp.net/api";
 
 export const ENV = {
   IMAGE_BASE_URL:
-    "http://emedicine-api.runasp.net",
+    "https://emedicine-api.runasp.net",
 };
