@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const BASE_URL = "https://emedicine-api.runasp.net/api";
+//const BASE_URL = "https://localhost:44302/api";
 
 // Notification
 export const getNotificationSettings = async () => {

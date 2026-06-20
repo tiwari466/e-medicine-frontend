@@ -153,16 +153,23 @@ export default function OrderList() {
 
             <div className="orderTopRow">
 
-              <div>
-                <p><b>Order:</b> {order.order_no}</p>
+ <div>
+  <h3 className="orderNumber">
+    Order #{order.order_no}
+  </h3>
 
-                <p>
-                  ₹ {order.order_total}{" "}
-                  <span className={getStatusClass(order.order_status)}>
-                    {order.order_status}
-                  </span>
-                </p>
-              </div>
+  <h2 className="orderAmount">
+    ₹ {order.order_total}
+  </h2>
+
+  <span
+    className={getStatusClass(
+      order.order_status
+    )}
+  >
+    {order.order_status}
+  </span>
+</div>
 
               <button
                 onClick={() =>

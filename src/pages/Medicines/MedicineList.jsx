@@ -9,7 +9,7 @@ import "./MedicineList.css";
 export default function MedicineList() {
   const navigate = useNavigate();
   const { user } = useAuth();                 // ✅ SINGLE SOURCE
-  const { refreshCartCount } = useCart();
+  const { cartCount, updateCartCount } = useCart();
 
   const [medicines, setMedicines] = useState([]);
   const [cartQty, setCartQty] = useState({});
@@ -92,8 +92,9 @@ export default function MedicineList() {
         total_price: qty * unit_price - discount,
       };
 
-      await addToCart(payload);
-      await refreshCartCount();
+     await addToCart(payload);
+
+updateCartCount(cartCount + qty);
 
       alert("Added to cart ✅");
     } catch (err) {
