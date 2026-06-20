@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { loginUser } from "../../../api/authApi";
 import { useAuth } from "../../../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,51 +6,101 @@ import {
   showSuccess,
   showError,
 } from "../../../utils/toast";
+
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  const [loading, setLoading] =
+    useState(false);
 
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token");
+
+    if (token) {
+      navigate("/medicines");
+    }
+  }, [navigate]);
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
-const handleLogin = async () => {
-  try {
-    const payload = {
-      email: form.email,
-      password: form.password,
-    };
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
 
-    const res = await loginUser(payload);
+      const payload = {
+        email: form.email,
+        password: form.password,
+      };
 
-    console.log("LOGIN RESPONSE:", res.data);
+      const res =
+        await loginUser(payload);
 
-    if (res.data?.statusCode === 200) {
-      const userData = res.data.data; // ✅ ONLY user object
+      console.log(
+        "LOGIN RESPONSE:",
+        res.data
+      );
 
-      // ✅ AuthContext handles localStorage + state
-      login(userData);
+      if (
+        res.data?.success &&
+        res.data?.statusCode === 200
+      ) {
+        const userData =
+          res.data.data;
 
-      // optional: token
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
+        login(
+          userData,
+          userData.token
+        );
+
+        showSuccess(
+          "Login Successful"
+        );
+
+        if (
+          userData.role ===
+          "Admin"
+        ) {
+          navigate(
+            "/admin/users"
+          );
+        } else {
+          navigate(
+            "/medicines"
+          );
+        }
+      } else {
+        showError(
+          res.data?.message ||
+            "Invalid Email or Password"
+        );
       }
+    } catch (err) {
+      console.error(
+        "LOGIN ERROR:",
+        err
+      );
 
-      navigate("/medicines");
-    } else {
-      showSuccess("❌ " + (res.data?.message || "Invalid Email or Password"));
+      showError(
+        err?.response?.data
+          ?.message ||
+          "Login Failed"
+      );
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    showSuccess("❌ Backend not reachable / CORS issue");
-  }
-};
-
+  };
 
   return (
     <div style={styles.page}>
@@ -107,9 +157,22 @@ const handleLogin = async () => {
             <span style={styles.forgot}>Forgot Password?</span>
           </div>
 
-          <button type="button" style={styles.loginBtn} onClick={handleLogin}>
-            Login
-          </button>
+<button
+  type="button"
+  style={{
+    ...styles.loginBtn,
+    opacity: loading ? 0.7 : 1,
+    cursor: loading
+      ? "not-allowed"
+      : "pointer",
+  }}
+  onClick={handleLogin}
+  disabled={loading}
+>
+  {loading
+    ? "Signing In..."
+    : "Login"}
+</button>
  
           <p style={styles.signupText}>
             Don’t have an account?{" "}
@@ -132,7 +195,7 @@ const handleLogin = async () => {
 
 const styles = {
   page: {
-    height: "100vh",
+    minheight: "100vh",
     display: "grid",
     gridTemplateColumns: "1.2fr 1fr",
     fontFamily: "Arial, sans-serif",
@@ -266,18 +329,18 @@ const styles = {
     textDecoration: "underline",
   },
 
-  loginBtn: {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "10px",
-    border: "none",
-    background: "linear-gradient(90deg, #56ccf2, #2f80ed)",
-    color: "white",
-    fontWeight: "bold",
-    cursor: "pointer",
-    fontSize: "15px",
-  },
-
+ loginBtn: {
+  width: "100%",
+  padding: "12px",
+  borderRadius: "10px",
+  border: "none",
+  background: "linear-gradient(90deg, #56ccf2, #2f80ed)",
+  color: "white",
+  fontWeight: "bold",
+  cursor: "pointer",
+  fontSize: "15px",
+  transition: "all 0.3s ease",
+},
   signupText: {
     marginTop: "16px",
     fontSize: "14px",

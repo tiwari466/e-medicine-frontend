@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { updateProfile } from "../../api/profileApi";
+import {getProfile,updateProfile,uploadProfilePic} from "../../api/profileApi";
 import { useAuth } from "../../context/AuthContext";
 import SettingsLayout from "../../components/layout/SettingsLayout";
 import toast from "react-hot-toast";
 import "./Profile.css";
+import { ENV } from "../../config/env";
 
 const BIO_MAX = 200;
 
@@ -22,7 +23,8 @@ export default function Profile() {
   });
 
   const [preview, setPreview] = useState("");
-
+  const [saving, setSaving] =
+  useState(false);
   useEffect(() => {
     if (!user) return;
     setForm({
@@ -36,11 +38,11 @@ export default function Profile() {
       address: user.address || "",
     });
     if (user.picture) {
-      setPreview(
-        user.picture.startsWith("http")
-          ? user.picture
-          : `https://localhost:44302${user.picture}`
-      );
+       setPreview(
+  user.picture.startsWith("http")
+    ? user.picture
+    : `${ENV.IMAGE_BASE_URL}${user.picture}`
+);
     }
   }, [user]);
 
@@ -50,19 +52,105 @@ export default function Profile() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleUpdate = async () => {
-    try {
-      const res = await updateProfile({ user_id: user.user_id, ...form });
-      if (res.data?.success) {
-        updateUser({ ...user, ...form });
-        toast.success("Profile updated successfully");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to update profile");
-    }
-  };
+const handleImageChange = async (e) => {
 
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+
+  setPreview(
+    URL.createObjectURL(file)
+  );
+
+  try {
+
+    const formData = new FormData();
+
+    formData.append(
+  "user_id",
+  user.user_id.toString()
+);
+
+    formData.append(
+      "picture",
+      file
+    );
+
+    const res =
+      await uploadProfilePic(
+        formData
+      );
+
+    const uploadedPath =
+      res.data?.data;
+
+    if (uploadedPath) {
+
+      updateUser({
+        ...user,
+        picture: uploadedPath,
+      });
+
+    setPreview(
+  `${ENV.IMAGE_BASE_URL}${uploadedPath}`
+);
+      toast.success(
+        "Profile picture updated"
+      );
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast.error(
+      "Image upload failed"
+    );
+  }
+};
+
+const handleUpdate = async () => {
+  try {
+    setSaving(true);
+
+    const res =
+      await updateProfile({
+        user_id: user.user_id,
+        first_name: form.first_name,
+        last_name: form.last_name
+      });
+
+    if (res.data?.success) {
+
+      updateUser({
+        ...user,
+        first_name: form.first_name,
+        last_name: form.last_name
+      });
+
+      toast.success(
+        "Profile updated successfully"
+      );
+    } else {
+      toast.error(
+        res.data?.message ||
+        "Update failed"
+      );
+    }
+  }
+  catch (error) {
+
+    console.error(error);
+
+    toast.error(
+      "Failed to update profile"
+    );
+  }
+  finally {
+    setSaving(false);
+  }
+};
   if (!user) {
     return <div className="profile-container">User not logged in</div>;
   }
@@ -77,12 +165,29 @@ export default function Profile() {
             <h1>Edit Profile</h1>
             <p>Manage your personal information and account details</p>
           </div>
-          <div className="profileImageWrapper">
-            <img
-              src={preview || "https://i.pravatar.cc/150"}
-              alt="Profile"
-            />
-          </div>
+         <div className="profileImageWrapper">
+
+  <img
+    src={preview || "https://i.pravatar.cc/150"}
+    alt="Profile"
+  />
+
+  <label
+    htmlFor="profileUpload"
+    className="upload-btn"
+  >
+    📷
+  </label>
+
+  <input
+    id="profileUpload"
+    type="file"
+    accept="image/*"
+    hidden
+    onChange={handleImageChange}
+  />
+
+</div>
         </div>
 
         {/* Form */}
@@ -195,9 +300,15 @@ export default function Profile() {
             >
               Cancel
             </button>
-            <button className="save-btn" onClick={handleUpdate}>
-              💾 Save Changes
-            </button>
+           <button
+  className="save-btn"
+  onClick={handleUpdate}
+  disabled={saving}
+>
+  {saving
+    ? "Saving..."
+    : "💾 Save Changes"}
+</button>
           </div>
 
         </div>

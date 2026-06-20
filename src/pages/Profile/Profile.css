@@ -31,15 +31,47 @@
 }
 
 /* ── Profile Image ────────────────────────────────── */
-.profileImageWrapper img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 3px solid #dbeafe;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+.profileImageWrapper img{
+  width:90px;
+  height:90px;
+  object-fit:cover;
+  border-radius:50%;
+  border:3px solid #dbeafe;
+  box-shadow:0 2px 8px rgba(37,99,235,.15);
+  display:block;
+}
+.profileImageWrapper{
+  position:relative;
 }
 
+.upload-btn{
+  position:absolute;
+  bottom:0;
+  right:0;
+
+  width:32px;
+  height:32px;
+
+  border-radius:50%;
+  background:#2563eb;
+  color:#fff;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  cursor:pointer;
+
+  font-size:14px;
+
+  border:2px solid #fff;
+
+  box-shadow:0 2px 10px rgba(0,0,0,.15);
+}
+
+.upload-btn:hover{
+  background:#1d4ed8;
+}
 /* ── Form ─────────────────────────────────────────── */
 .profile-form {
   display: flex;

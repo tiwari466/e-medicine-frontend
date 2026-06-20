@@ -54,7 +54,12 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
 
-    navigate("/login");
+    setIsOpen(false);
+
+    navigate(
+      "/login",
+      { replace: true }
+    );
   };
 
   return (
@@ -118,10 +123,8 @@ export default function Navbar() {
             src={profileImage}
             alt="profile"
             className="profile-img"
-            onClick={() => {
-  console.log("clicked");
-  setIsOpen(!isOpen);
-}
+            onClick={() =>
+              setIsOpen(!isOpen)
             }
           />
 
@@ -130,25 +133,54 @@ export default function Navbar() {
 
               <div
                 className="dropdown-item"
-                onClick={() =>
-                  navigate(
-                    "/profile"
-                  )
-                }
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/profile");
+                }}
               >
                 My Profile
               </div>
 
               <div
                 className="dropdown-item"
-                onClick={() =>
-                  navigate(
-                    "/orders"
-                  )
-                }
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/orders");
+                }}
               >
                 My Orders
               </div>
+
+              {user?.role ===
+                "Admin" && (
+                <>
+                  <div className="divider" />
+
+                  <div
+                    className="dropdown-item"
+                    onClick={() => {
+                      setIsOpen(false);
+                      navigate(
+                        "/admin/users"
+                      );
+                    }}
+                  >
+                    User Management
+                  </div>
+
+                  <div
+                    className="dropdown-item"
+                    onClick={() => {
+                      setIsOpen(false);
+                      navigate(
+                        "/admin/add-medicine"
+                      );
+                    }}
+                  >
+                    Manage Medicines
+                  </div>
+                </>
+              )}
 
               <div className="divider" />
 

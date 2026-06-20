@@ -27,9 +27,9 @@ export default function PrivateRoute({
   }
 
   if (
-    adminOnly &&
-    user?.type !== "Admin"
-  ) {
+  adminOnly &&
+  user?.role !== "Admin"
+) {
     return <Navigate to="/medicines" replace />;
   }
 
