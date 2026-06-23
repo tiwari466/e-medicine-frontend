@@ -4,10 +4,12 @@ import { addToCart } from "../../api/cartApi";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import "./MedicineList.css";
 
 export default function MedicineList() {
   const navigate = useNavigate();
+    const { isDark } = useTheme();
   const { user } = useAuth();                 // ✅ SINGLE SOURCE
   const { cartCount, updateCartCount } = useCart();
 
@@ -107,7 +109,7 @@ updateCartCount(cartCount + qty);
   // UI
   // ===============================
   return (
-    <div className="med-page">
+     <div className={`med-page ${isDark ? "dark" : ""}`}>
       {/* HERO */}
       <div className="med-hero">
         <h2>Say Goodbye to High Medicine Prices 💙</h2>

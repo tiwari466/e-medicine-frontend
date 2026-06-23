@@ -3,6 +3,7 @@ import {getProfile,updateProfile,uploadProfilePic} from "../../api/profileApi";
 import { useAuth } from "../../context/AuthContext";
 import SettingsLayout from "../../components/layout/SettingsLayout";
 import toast from "react-hot-toast";
+import { useTheme } from "../../context/ThemeContext";
 import "./Profile.css";
 import { ENV } from "../../config/env";
 
@@ -10,7 +11,7 @@ const BIO_MAX = 200;
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
-
+  const { isDark } = useTheme();
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -157,7 +158,7 @@ const handleUpdate = async () => {
 
   return (
     <SettingsLayout>
-      <div className="profile-container">
+      <div className={`profile-container ${isDark ? "dark" : ""}`}>
 
         {/* Header */}
         <div className="profile-header">

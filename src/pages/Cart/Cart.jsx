@@ -9,10 +9,12 @@ import { placeOrder } from "../../api/orderApi";
 
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { useTheme } from "../../context/ThemeContext";
 import "./Cart.css";
 
 export default function Cart() {
    const { user } = useAuth();
+   const { isDark } = useTheme();
   const [cartItems, setCartItems] = useState([]);
   const { refreshCartCount } = useCart();
 
@@ -117,7 +119,7 @@ const handlePlaceOrder = async () => {
 };
 
   return (
-    <div className="cartPage">
+    <div className={`cartPage ${isDark ? "dark" : ""}`}>
       <h2 className="cartTitle">🛒 My Cart</h2>
 
       {cartItems.length === 0 ? (

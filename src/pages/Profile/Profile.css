@@ -287,3 +287,75 @@
     justify-content: center;
   }
 }
+/* =================================
+   DARK MODE PROFILE
+================================= */
+
+.profile-container.dark {
+  background: #111827;
+  color: white;
+  border: 1px solid #1f2937;
+}
+
+.profile-container.dark .profile-header {
+  border-bottom: 1px solid #334155;
+}
+
+.profile-container.dark .profile-header-text h1 {
+  color: white;
+}
+
+.profile-container.dark .profile-header-text p {
+  color: #cbd5e1;
+}
+
+.profile-container.dark .field label {
+  color: #e2e8f0;
+}
+
+.profile-container.dark .field input,
+.profile-container.dark .field select,
+.profile-container.dark .field textarea {
+  background: #1e293b;
+  color: white;
+  border: 1px solid #334155;
+}
+
+.profile-container.dark .field input::placeholder,
+.profile-container.dark .field textarea::placeholder {
+  color: #94a3b8;
+}
+
+.profile-container.dark .field input:disabled {
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+.profile-container.dark .field input:focus,
+.profile-container.dark .field select:focus,
+.profile-container.dark .field textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.2);
+}
+
+.profile-container.dark .bio-counter {
+  color: #94a3b8;
+}
+
+.profile-container.dark .action-row {
+  border-top: 1px solid #334155;
+}
+
+.profile-container.dark .cancel-btn {
+  background: #1e293b;
+  color: white;
+  border-color: #334155;
+}
+
+.profile-container.dark .cancel-btn:hover {
+  background: #334155;
+}
+
+.profile-container.dark .upload-btn {
+  border-color: #111827;
+}

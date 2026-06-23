@@ -145,3 +145,63 @@
   font-size: 18px;
   cursor: pointer;
 }
+/* =================================
+   DARK MODE
+================================= */
+
+.cartPage.dark {
+  background: #020617;
+  color: white;
+}
+
+.cartPage.dark .cartTitle {
+  color: white;
+}
+
+.cartPage.dark .cartItemCard {
+  background: #111827;
+  border: 1px solid #1f2937;
+}
+
+.cartPage.dark .cartItemName {
+  color: white;
+}
+
+.cartPage.dark .cartItemTotal {
+  color: white;
+}
+
+.cartPage.dark .summaryCard {
+  background: #111827;
+  border: 1px solid #1f2937;
+}
+
+.cartPage.dark .summaryTitle,
+.cartPage.dark .summaryRow,
+.cartPage.dark .summaryTotal {
+  color: white;
+}
+
+.cartPage.dark .summaryTotal {
+  border-top: 2px solid #334155;
+}
+
+.cartPage.dark .qtyText {
+  color: white;
+}
+
+.cartPage.dark .qtyBtn {
+  background: #2563eb;
+}
+
+.cartPage.dark .removeBtn {
+  background: #dc2626;
+}
+
+.cartPage.dark .placeOrderBtn {
+  background: linear-gradient(
+    135deg,
+    #22c55e,
+    #16a34a
+  );
+}
